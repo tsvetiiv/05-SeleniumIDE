@@ -1,0 +1,37 @@
+
+name: Selenium IDE Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 6
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Restore dependencies
+        run: dotnet restore SeleniumIde.sln
+
+      - name: Build solution
+        run: dotnet build SeleniumIde.sln --no-restore
+
+      - name: Run Selenium tests
+        env:
+          CHROMEWEBDRIVER: /usr/bin
+        run: dotnet test SeleniumIde.sln --no-build --verbosity normal
